@@ -41,6 +41,7 @@ class TcpServerAcceptor implements TcpServerHandler {
 
     @Override
     public void register(final Selector selector) {
+    	System.out.println("accecptor selector.hashCode() = "+selector.hashCode());
         try {
             final ServerSocketChannel server = ServerSocketChannel.open();
             server.socket().bind(new InetSocketAddress(config.getPort()), ACCEPT_BUFFER_SIZE);

@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 class TcpServerWorker extends Thread {
 
-    private final static long SELECTOR_TIMEOUT = 100L;
+    private final static long SELECTOR_TIMEOUT = 10000L;
     private final static Logger LOGGER = Logger.getAnonymousLogger();
 
     private final Queue<TcpServerHandler> handlers;
@@ -41,6 +41,7 @@ class TcpServerWorker extends Thread {
         Selector selector = null;
         try {
             selector = Selector.open();
+            System.out.println("Thread="+Thread.currentThread().getName()+" selector.hashCode()="+selector.hashCode());
 
             while (!Thread.interrupted()) {
                 TcpServerHandler newHandler = handlers.poll();
@@ -49,13 +50,21 @@ class TcpServerWorker extends Thread {
                 }
 
                 selector.select(SELECTOR_TIMEOUT);
+//                selector.select();
 
                 final Set<SelectionKey> keys = selector.selectedKeys();
+                System.out.println("keys.size()="+keys.size());
                 for (final SelectionKey key : keys) {
                     final TcpServerHandler handler = (TcpServerHandler) key.attachment();
                     handler.process(key);
                 }
                 keys.clear();
+                try {
+					Thread.currentThread().sleep(1);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
         } catch (final IOException exception) {
             if (LOGGER.isLoggable(Level.SEVERE))
